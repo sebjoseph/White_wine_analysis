@@ -1,0 +1,422 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
+                      echo=FALSE, warning=FALSE, message=FALSE)
+```
+#Analysis of white wine
+
+####by
+Sebastian P Joseph
+
+
+========================================================
+
+#Short description
+
+This tidy data set contains 4,898 white wines with 11 variables on quantifying the chemical properties of each wine. At least 3 wine experts rated the quality of each wine, providing a rating between 0 (very bad) and 10 (very excellent).
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+
+library(ggplot2)
+library(gridExtra)
+```
+
+```{r echo=FALSE, Load_the_Data}
+# Loading the Data
+white<-read.csv("wineQualityWhites.csv")
+
+```
+
+#Summary of the data
+```{r echo=FALSE, outlook_of_variables}
+head(white)
+```
+#Description of the dataset
+1  Fixed acidity: 
+    most acids involved with wine or fixed or nonvolatile
+    (do not evaporate readily).
+
+2  Volatile acidity:
+    The amount of acetic acid in wine, which at too high of levels can lead     to an unpleasant, vinegar taste.
+
+3  Citric acid: found in small quantities, citric acid can add 'freshness' 
+    and flavor to wines.
+
+4  Residual sugar: the amount of sugar remaining after fermentation stops,    it's rare to find wines with less than 1 gram/liter and wines with          greater than 45 grams/liter are considered sweet.
+
+5  Chlorides: the amount of salt in the wine.
+
+6  Free sulfur dioxide: the free form of SO2 exists in equilibrium between 
+    molecular SO2 (as a dissolved gas) and bisulfite ion; it prevents          microbial growth and the oxidation of wine.
+
+7  Total sulfur dioxide: amount of free and bound forms of S02; in low 
+    concentrations, SO2 is mostly undetectable in wine, but at free SO2 
+    concentrations over 50 ppm, SO2 becomes evident in the nose and taste      of wine.
+
+8  Density: the density of water is close to that of water depending on the     percent alcohol and sugar content.
+
+9  pH: describes how acidic or basic a wine is on a scale from 0 (very         acidic) to 14 (very basic); most wines are between 3-4 on the pH scale.
+
+10  Sulphates: a wine additive which can contribute to sulfur dioxide gas       (S02) levels, wich acts as an antimicrobial and antioxidant.
+
+11 Alcohol: the percent alcohol content of the wine
+
+    Output variable (based on sensory data):
+    
+12  Quality (score between 0 and 10).
+
+#Process of data munging
+The variable 'X' is supposed to be removed because it just does the numbering of wines in the given dataset
+
+```{r echo=FALSE, Removing_variable_X}
+white$X<-NULL
+head(white)
+```
+#Quality coloumn can be divided into 3
+```{r echo = FALSE, new_variables}
+
+white["quality.type"] <- white$quality
+white$quality.type <- cut(white$quality, breaks = c(0, 3.5, 6.5, 10),
+                         labels = c("normal", "better", "good"))
+white["citric.type"] <- white$citric.acid
+white$citric.type <- cut(white$citric.acid, breaks = c(-Inf, 0.5, 1, +Inf),
+                         labels = c("low", "medium", "high"))
+head(white)
+```
+#Summary of the data
+```{r echo=FALSE, summary_of_variables}
+white$quality.factor <- factor(white$quality, ordered=TRUE)
+summary(white)
+
+```
+#Univariate plot section
+
+```{r echo=FALSE, Univariate_Plot_1}
+
+create_plot <- function(variable, binwidth = 0.01) {
+  return(ggplot(aes_string(x = variable), data = white) + 
+           geom_histogram(aes(fill=..count..),binwidth = binwidth))}
+
+```
+ 
+ Histogram of fixed acidity
+ 
+```{r echo=FALSE, Univariate_Plot_2}
+
+create_plot('fixed.acidity', 0.1)
+
+```
+
+The fixed acidity as shown in the above plot depicts a normal distribution curve.I found that the mean is approximately 6.8 and the median is around 6.8
+The maximum count is nearly 310 in an interval range of {3.80, 14.2}
+
+  
+```{r echo=FALSE, Univariate_Plot_3}
+
+
+create_plot('volatile.acidity', 0.1)
+
+
+```
+
+The volatile activity as shown in the above plot depicts a positive skew distribution curve.I found that the mean is approximately 0.08 and the median is around 0.26
+in an interval range of {0.08, 1.10}.
+
+
+```{r echo=FALSE, Univariate_Plot_4}
+
+
+create_plot('citric.acid', 0.1)
+```
+
+The citric acid as shown in the above plot depicts a normal distribution curve.I found that the mean is approximately 0.33 and the median is around 0.32 in an interval range of {0, 1.66}.
+
+
+```{r echo=FALSE, Univariate_Plot_5}
+
+create_plot('residual.sugar', 0.1)
+```
+
+The residual sugar as shown in the above plot depicts a positive skew distribution curve.I found that the mean is approximately 6.39 and the median is around 5.2 in an interval range of {0.60, 65.8}
+
+```{r echo=FALSE, Univariate_Plot_6}
+
+create_plot('chlorides', 0.005) 
+```
+
+The chlorides as shown in the above plot depicts a positive skew distribution curve.I found that the mean is approximately 0.045 and the median is around 0.043 in an interval range of {0.009, 0.346}
+
+
+```{r echo=FALSE, Univariate_Plot_7}
+
+
+ create_plot('total.sulfur.dioxide', 5) 
+```
+
+The sulfur dioxide as shown in the above plot depicts a bimodal distribution curve.I found that the mean is approximately 138.4 and the median is around 134 in an interval range of {9, 440}
+
+```{r echo=FALSE, Univariate_Plot_8}
+
+
+ create_plot('free.sulfur.dioxide', 5) 
+```
+
+The free sulfur dioxide as shown in the above plot depicts a normal distribution curve.I found that the mean is approximately 34 and the median is around 35.31 
+
+```{r echo=FALSE, Univariate_Plot_9}
+create_plot('pH', 0.02) 
+
+```
+
+The pH as shown in the above plot depicts a binomial distribution curve.I found that the mean is approximately 3.188 and the median is around 3.18 in an interval range of {2.72, 3.82}
+
+```{r echo=FALSE, Univariate_Plot_10}
+
+
+ create_plot('sulphates', 0.02)
+```
+
+The sulphates as shown in the above plot depicts a binomial distribution curve.I found that the mean is approximately 0.489 and the median is around 0.47 in an interval range of {0.22, 1.08}
+
+```{r echo=FALSE, Univariate_Plot_11}
+
+ create_plot('alcohol', 0.1)
+```
+
+The alcohol as shown in the above plot depicts a positive skew distribution curve.I found that the mean is approximately 10.51 and the median is around 14 in an interval range of {8, 14.2}
+
+```{r echo=FALSE, Univariate_Plot_12}
+ggplot(aes(x = quality), data = white) + 
+           geom_histogram(binwidth = 1)
+```
+
+The quality as shown in the above plot depicts a bimodal distribution curve.I found that the mean is approximately 5.878 and the median is around 6 and has an interval range of {0.08, 1.10}
+
+#Plotting new variables
+```{r echo=FALSE, Univariate_Plot_13}
+
+p1=ggplot(aes(x = quality.type), data = white) +             geom_bar(aes(fill=..count..))
+p2=ggplot(aes(x = citric.type), data = white) + geom_bar(aes(fill=..count..))
+grid.arrange(p1,p2,ncol=2)
+ 
+```
+
+White wine has a better quality wine. normal quality.type has a count of 20, better quality.type of 3818 and good quality.type of 1060. totally three categories. White wine produces better quality wine with low citrus level.White wine consists of less amount of flavour in wine. less citric.type has a count of 4584, medium citric.type of 312 and more citric.type of 2.Totally three categories.
+
+#Transforming the variables
+
+```{r echo=FALSE, transformed_the_univariate_plots}
+
+p1<-ggplot(aes(x = volatile.acidity), data = white) + 
+        geom_histogram(aes(fill=..count..),binwidth = 0.05, bins = 30) + 
+        scale_x_log10()
+p2<-ggplot(aes(x = chlorides), data = white) +
+      geom_histogram(aes(fill=..count..),binwidth = 0.05, bins = 30) +
+      scale_x_log10(breaks = scales::trans_breaks("log10", function(x) 10^x))
+p3<-ggplot(aes(x = residual.sugar), data = white) +
+       geom_histogram(aes(fill=..count..),binwidth = 0.05, bins = 30) + 
+       scale_x_log10(breaks = scales::trans_breaks("log10", function(x) 10^x))
+p4<-ggplot(aes(x = alcohol), data = white) + 
+      geom_histogram(aes(fill=..count..),binwidth = 0.05, bins = 30) + 
+       scale_x_log10(breaks = scales::trans_breaks("log10", function(x) 10^x))
+grid.arrange(p1,p2,p3,p4,ncol = 2)
+```
+
+The breaks function is used in order to provide sufficient view in the plots with the log values.The Volatile acidity plot as we can see depicts a binomial distribution The Chlorides as we can see got a binomial distribution The Residual sugar as we can see depicts a bimodal distribution and Alcohol got binomial distribution
+
+# Coorelation between the variables
+
+Quality of alcohol
+
+```{r echo= FALSE}
+cor.test(white$quality, white$alcohol)
+```
+
+-->The correlation between quality and alcohol is 0.4355747.
+
+Density of alcohol
+
+```{r echo= FALSE}
+cor.test(white$density, white$alcohol)
+```
+
+-->The correlation between density and alcohol is -0.7801376 
+
+
+Density of chlorides
+
+```{r echo= FALSE}
+cor.test(white$density, white$chlorides)
+```
+
+-->The correlation between density and chloride is 0.2572113 
+
+
+Density of sulphates
+
+```{r echo= FALSE}
+cor.test(white$density, white$sulphates)
+```
+
+-->The correlation between density and sulphate is 0.07449315
+
+# Bivariate Plots Section
+
+Chlorides and quality
+
+```{r echo=FALSE, Bivariate_Plots}
+
+
+ggplot(aes(factor(quality), 
+            chlorides), 
+        data = white) +
+  geom_jitter( alpha = .3)  +
+  geom_boxplot( alpha = .5,color = 'blue')+
+  stat_summary(fun.y = "mean", 
+               geom = "point", 
+               color = "red", 
+               shape = 8, 
+               size = 4)
+```
+Many outliers at 5 and 6
+
+
+Alcohol based on quality
+
+```{r echo=FALSE}
+ggplot(data=white, aes(y=alcohol, x = quality)) + geom_boxplot(aes(color=quality.factor)) 
+   
+```
+
+High quality wine has more amount of alcohol content in it!Most of the white wine samples seem to be of quality 5 and 6.Very high quality wine 9 seem to be less in number.
+
+Free sulfurdioxide and total sulfurdioxide
+
+```{r echo=FALSE, Bivariate_Plot_1}
+ggplot(aes(x = free.sulfur.dioxide, y = total.sulfur.dioxide), data = white) + geom_point(alpha = 1/10, position = position_jitter(h = 0))+scale_x_continuous(limits = c(0,130))
+```
+As seen in the above plot the data lies between the first and the second quartile.
+This is the strongest relationship i found
+
+Volatile.acidity and citric.acid
+
+```{r echo= FALSE}
+cor.test(white$volatile.acidity, white$citric.acid)
+ggplot(aes(x = volatile.acidity, y = citric.acid), data = white) + 
+               geom_point(alpha = 1/10, position = position_jitter(h = 0))
+```
+
+By comparing volatile.acidity and citric.acid plot, we observe that it has a negative correlation between them. The data lies mostly between the 2nd and 3rd quartile. volatile.acidity depends on the taste of the wine where less amount of volatile gives the better taste and citric.acid depends on the addition of flavour and freshness to wine where higher the amount of citric acid increases the freshness and flavour to the wine. 
+
+
+# Multivariate Plots Section
+
+
+Alcohol and sulphates based on quality
+
+```{r echo=FALSE}
+cor.test(white$alcohol, white$sulphates)
+
+ggplot(aes(x = alcohol, 
+           y = sulphates  , color = factor(quality)), 
+       data = white) +
+      geom_point(alpha = 0.8, size = 1) +
+      geom_smooth(method = "lm", se = FALSE,size=1)  +
+  scale_color_brewer(type='seq',
+                   guide=guide_legend(title='Quality'))
+```
+
+
+From this plot we observe a negative correlation between alcohol and sulphates where facet was done by quality and found quality of wine is better for alcohol and sulphates.   
+
+alcohol Density based on quality
+
+```{r echo=FALSE}
+
+ggplot(aes(x = density, y = alcohol  , color = factor(quality)), 
+       data = white) +
+      geom_point(alpha = 0.8, size = 1) +
+      geom_smooth(method = "lm", se = FALSE,size=1) +scale_y_continuous(limits = c(8,15))+scale_x_continuous(limits = c(0.985,1.005))+
+  scale_color_brewer(type='seq',
+                   guide=guide_legend(title='Alcohol density based on Quality'))
+```
+
+The plot seems to have better quality when compared to others.
+Used facet wrap to analyze the above data.
+
+
+Density and pH based on quality
+
+```{r echo=FALSE}
+cor.test(white$density, white$pH)
+ggplot(aes(x = density, y = pH), data = white, color = factor(quality)) +
+  geom_point(alpha = 1/10, position = position_jitter(h = 0))  + 
+  facet_wrap(~quality.type) + geom_smooth(method = "lm", se = FALSE, size = 1) 
+     
+```
+
+From this density and pH plot based on quality factor, we used facet for quality.type and also found negative correlation between density and pH. Then we used geom_smooth to add a summary line in the plot.
+
+
+# Final Plots and Summary
+
+### Alcohol based on quality
+
+```{r echo=FALSE}
+ggplot(data=white, aes(y=alcohol, x = quality)) + geom_boxplot(aes(color=quality.factor)) + 
+  ggtitle("Alcohol by quality") + 
+    ylab("alcohol (%)")+xlab("Quality(score between 0 and 10")
+   
+```
+
+### Description One
+High quality wine has more amount of alcohol content in it!Most of the white wine samples seem to be of quality 5 and 6.Very high quality wine 9 seem to be less in number. As seen in the above graph we compare the alcohol content in the wine based on quality. As we see there are many outliers in quality number 5 and the quality is better for 6 and 7 as we see in the graph
+
+
+### Density of alcohol based on quality
+
+```{r echo=FALSE}
+
+ggplot(aes(x = density, 
+           y = alcohol  , color = factor(quality)), 
+       data = white) +
+      geom_point(alpha = 0.8, size = 1) +
+      geom_smooth(method = "lm", se = FALSE,size=1)+ylab("alcohol (%)") +xlab("density (g/cm^3)") +scale_y_continuous(limits = c(8,15))+scale_x_continuous(limits = c(0.985,1.005))+
+  scale_color_brewer(type='seq',
+                   guide=guide_legend(title='Alcohol density based on Quality'))
+```
+
+### Description Two
+The plot seems to have better quality when compared to others.
+Used facet wrap to analyze the above data.From the above graph we can see that the alcohol content in percentage is about 12 and 14 % for a density of 0.995 and then reduces accordingly. Usually for wine alcohol content is supposed to be low
+
+### Volatile.acidity vs citric.acid
+
+```{r echo= FALSE}
+cor.test(white$volatile.acidity, white$citric.acid)
+ggplot(aes(x = volatile.acidity, y = citric.acid), data = white) + 
+               geom_point(alpha = 1/10, position = position_jitter(h = 0))+ggtitle("Volatile.acidity vs citric.acid") + 
+   xlab("volatile.acidity (g/dm^3)") + ylab("citric acid (g / dm^3)")
+   
+```
+
+### Description Three
+
+The data lies mostly between the 2nd and 3rd quartile.volatile.acidity depends on the taste of the wine where less amount of volatilegives the better taste and citric.acid depends on the addition of flavour andfreshness to wine where higher the amount of citric acid increases the freshnessand flavour to the wine. Therefore I conclude that the wines that we can prefercontaining a volatile.acidity of nearly 0.18 which would be of much taste, alsocontaining the citric.acid of 1.7. some amount of outliers also exists in this plot.
+
+# Reflection
+
+This tidy data set contains 4,898 white wines with 11 variables on quantifying the chemical properties of each wine. At least 3 wine experts rated the quality of each wine, providing a rating between 0 (very bad) and 10 (very excellent).
+volatile.acidity and citric.acid are negatively correlated where volatile.acidity depends on the taste of the wine where less amount of 
+volatilegives the better taste and citric.acid depends on the addition of flavour and freshness to wine where higher the amount of citric acid increases the freshness and flavour to the wine.
+The density of the alcohol increases as the alcohol content decreases
+Low chloride levels increases the quality of wine.
+Found many corelations between the variables and shown some.
+Some things which I have learned is that to make different type of plots and colorful plots.
+There wernt much difficulty in analyzing the given data. I might be challenging if there was more data
+
